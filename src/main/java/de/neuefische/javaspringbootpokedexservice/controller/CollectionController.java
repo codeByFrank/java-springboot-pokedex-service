@@ -5,6 +5,7 @@ import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.service.CollectionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/collection")
@@ -16,9 +17,10 @@ public class CollectionController {
         this.collectionService = collectionService;
     }
 
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Pokemon addFavorite(@RequestBody FavoriteDTO favoriteDTO) {
+    public Pokemon addFavorite(@Valid @RequestBody FavoriteDTO favoriteDTO) {
         return collectionService.addFavorite(favoriteDTO);
     }
 }
