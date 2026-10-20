@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/collection")
 public class CollectionController {
@@ -22,5 +24,10 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.CREATED)
     public Pokemon addFavorite(@Valid @RequestBody FavoriteDTO favoriteDTO) {
         return collectionService.addFavorite(favoriteDTO);
+    }
+
+    @GetMapping
+    public List<Pokemon> getAllFavorites() {
+        return collectionService.getAllFavorites();
     }
 }

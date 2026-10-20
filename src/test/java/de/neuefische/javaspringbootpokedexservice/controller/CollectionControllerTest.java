@@ -13,7 +13,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 class CollectionControllerTest {
 
     @Test
@@ -122,5 +122,38 @@ class CollectionControllerTest {
                 ));
 
         verifyNoInteractions(service);
+    }
+
+    @Test
+    void getAllFavorites_shouldReturnSavedFavorites() throws Exception {
+
+        CollectionService service = mock(CollectionService.class);
+
+        Pokemon favorite = new Pokemon(
+                "favorite-1",
+                "25",
+                "Mein Starter",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        when(service.getAllFavorites()).thenReturn(List.of(favorite));
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .build();
+
+
+        mockMvc.perform(get("/api/collection"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value("favorite-1"))
+                .andExpect(jsonPath("$[0].pokemonName").value("pikachu"))
+                .andExpect(jsonPath("$[0].nickname").value("Mein Starter"));
+
+        verify(service).getAllFavorites();
     }
 }

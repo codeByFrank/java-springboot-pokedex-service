@@ -5,6 +5,7 @@ import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.repository.PokemonRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,5 +39,9 @@ public class CollectionService {
         );
 
         return pokemonRepository.save(favorite);
+    }
+
+    public List<Pokemon> getAllFavorites() {
+        return pokemonRepository.findAll();
     }
 }
