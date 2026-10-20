@@ -13,6 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound;
 
 class PokemonServiceTest {
 
@@ -70,6 +74,29 @@ class PokemonServiceTest {
 
         // THEN: Ergebnis prüfen
         assertEquals(expected, actual);
+        server.verify();
+    }
+
+
+    @Test
+    void getPokemonByName_shouldThrowException_whenPokemonDoesNotExist() {
+
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server =
+                MockRestServiceServer.bindTo(builder).build();
+
+        PokemonService service = new PokemonService(builder);
+
+        server.expect(requestTo(
+                        "https://pokeapi.co/api/v2/pokemon/unknownpokemon"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withResourceNotFound());
+
+        assertThrows(
+                PokemonNotFoundException.class,
+                () -> service.getPokemonByName("unknownpokemon")
+        );
+
         server.verify();
     }
 }

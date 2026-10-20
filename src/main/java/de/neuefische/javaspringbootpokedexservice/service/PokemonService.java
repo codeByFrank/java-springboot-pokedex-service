@@ -4,6 +4,8 @@ import java.util.List;
 import de.neuefische.javaspringbootpokedexservice.dto.PokemonApiDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class PokemonService {
@@ -17,10 +19,19 @@ public class PokemonService {
     }
 
     public Pokemon getPokemonByName(String name) {
-        PokemonApiDTO pokemonApiDTO = restClient.get()
-                .uri("/pokemon/{name}", name)
-                .retrieve()
-                .body(PokemonApiDTO.class);
+
+        PokemonApiDTO pokemonApiDTO;
+
+        try {
+            pokemonApiDTO = restClient.get()
+                    .uri("/pokemon/{name}", name)
+                    .retrieve()
+                    .body(PokemonApiDTO.class);
+        } catch (HttpClientErrorException.NotFound exception) {
+            throw new PokemonNotFoundException(
+                    "Pokemon '" + name + "' not found"
+            );
+        }
 
         if (pokemonApiDTO == null) {
             throw new IllegalStateException("Pokemon API returned an empty response");
