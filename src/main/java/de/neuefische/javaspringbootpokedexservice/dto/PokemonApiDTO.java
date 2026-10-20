@@ -7,6 +7,7 @@ public record PokemonApiDTO(
         String name,
         int height,
         int weight,
-        List<PokemonTypeDTO> types
+        List<PokemonTypeDTO> types,
+        PokemonSpritesDTO sprites
 ) {
 }
