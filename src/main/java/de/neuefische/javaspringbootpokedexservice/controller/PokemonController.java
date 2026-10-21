@@ -21,4 +21,9 @@ public class PokemonController {
     public Pokemon getPokemonByName(@PathVariable String name) {
         return pokemonService.getPokemonByName(name);
     }
+
+    @GetMapping("/random")
+    public Pokemon getRandomPokemon() {
+        return pokemonService.getRandomPokemon();
+    }
 }

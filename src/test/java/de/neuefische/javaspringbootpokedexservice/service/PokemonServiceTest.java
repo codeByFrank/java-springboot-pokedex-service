@@ -9,13 +9,12 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound;
 
 class PokemonServiceTest {
@@ -97,6 +96,57 @@ class PokemonServiceTest {
                 () -> service.getPokemonByName("unknownpokemon")
         );
 
+        server.verify();
+    }
+
+    @Test
+    void getRandomPokemon_shouldRequestIdBetween1And151() {
+        // GIVEN
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server =
+                MockRestServiceServer.bindTo(builder).build();
+
+        PokemonService service = new PokemonService(builder);
+
+        String responseBody = """
+            {
+              "id": 92,
+              "name": "gastly",
+              "height": 13,
+              "weight": 1,
+              "types": [
+                {"type": {"name": "ghost"}},
+                {"type": {"name": "poison"}}
+              ],
+              "sprites": {
+                "other": {
+                  "official-artwork": {
+                    "front_default": "https://example.com/gastly.png"
+                  }
+                }
+              }
+            }
+            """;
+
+        server.expect(request -> {
+                    String path = request.getURI().getPath();
+
+                    assertTrue(path.startsWith("/api/v2/pokemon/"));
+
+                    String idText = path.substring(path.lastIndexOf("/") + 1);
+                    int pokemonId = Integer.parseInt(idText);
+
+                    assertTrue(pokemonId >= 1 && pokemonId <= 151);
+                })
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(
+                        responseBody, MediaType.APPLICATION_JSON));
+
+        // WHEN
+        Pokemon actual = service.getRandomPokemon();
+
+        // THEN
+        assertEquals("gastly", actual.pokemonName());
         server.verify();
     }
 }

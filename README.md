@@ -89,6 +89,7 @@ API-Antworten. Die Controller-Tests verwenden MockMvc.
 | POST | `/api/collection` | Favoriten speichern | 201 |
 | GET | `/api/collection` | Alle Favoriten abrufen | 200 |
 | GET | `/api/collection/{id}` | Einzelnen Favoriten abrufen | 200 |
+| GET | `/api/pokemon/random` | Zufälliges Pokémon aus den ersten 151 abrufen | 200 |
 | PUT | `/api/collection/{id}` | Nickname ändern | 200 |
 | DELETE | `/api/collection/{id}` | Favoriten löschen | 204 |
 
@@ -160,6 +161,10 @@ Beispiel:
 ```
 
 ## Bonusaufgaben
+
+- Zufälliges Pokémon: `GET /api/pokemon/random` liefert ein
+  zufällig ausgewähltes Pokémon aus den ersten 151 Pokémon.
+  Der Abruf speichert keinen Favoriten.
 
 - Favoriten durchsuchen: Suche nach Teilen des Pokémon-Namens
   oder Nicknames, unabhängig von Groß- und Kleinschreibung.
