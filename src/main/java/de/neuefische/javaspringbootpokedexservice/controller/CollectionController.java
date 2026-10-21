@@ -35,4 +35,10 @@ public class CollectionController {
     public Pokemon getFavoriteById(@PathVariable String id) {
         return collectionService.getFavoriteById(id);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFavorite(@PathVariable String id) {
+        collectionService.deleteFavorite(id);
+    }
 }

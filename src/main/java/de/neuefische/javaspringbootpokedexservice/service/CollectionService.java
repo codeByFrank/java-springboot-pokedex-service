@@ -52,4 +52,14 @@ public class CollectionService {
                         "Favorite with id '" + id + "' not found"
                 ));
     }
+
+    public void deleteFavorite(String id) {
+        if (!pokemonRepository.existsById(id)) {
+            throw new CollectionEntryNotFoundException(
+                    "Favorite with id '" + id + "' not found"
+            );
+        }
+
+        pokemonRepository.deleteById(id);
+    }
 }

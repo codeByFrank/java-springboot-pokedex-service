@@ -12,9 +12,9 @@ import de.neuefische.javaspringbootpokedexservice.exception.GlobalExceptionHandl
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 class CollectionControllerTest {
 
     @Test
@@ -213,5 +213,47 @@ class CollectionControllerTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
         verify(service).getFavoriteById("unknown-id");
+    }
+
+    @Test
+    void deleteFavorite_shouldReturn204_whenIdExists() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .build();
+
+        // WHEN + THEN
+        mockMvc.perform(delete("/api/collection/favorite-1"))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(service).deleteFavorite("favorite-1");
+    }
+
+    @Test
+    void deleteFavorite_shouldReturn404_whenIdDoesNotExist() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        doThrow(new CollectionEntryNotFoundException(
+                "Favorite with id 'unknown-id' not found"
+        )).when(service).deleteFavorite("unknown-id");
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        // WHEN + THEN
+        mockMvc.perform(delete("/api/collection/unknown-id"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        "Favorite with id 'unknown-id' not found"
+                ))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        verify(service).deleteFavorite("unknown-id");
     }
 }

@@ -177,4 +177,47 @@ class CollectionServiceTest {
         verify(pokemonRepository).findById("unknown-id");
         verifyNoInteractions(pokemonService);
     }
+
+    @Test
+    void deleteFavorite_shouldDeleteFavorite_whenIdExists() {
+        // GIVEN
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        when(pokemonRepository.existsById("favorite-1"))
+                .thenReturn(true);
+
+        // WHEN
+        collectionService.deleteFavorite("favorite-1");
+
+        // THEN
+        verify(pokemonRepository).existsById("favorite-1");
+        verify(pokemonRepository).deleteById("favorite-1");
+        verifyNoInteractions(pokemonService);
+    }
+
+    @Test
+    void deleteFavorite_shouldThrowException_whenIdDoesNotExist() {
+        // GIVEN
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        when(pokemonRepository.existsById("unknown-id"))
+                .thenReturn(false);
+
+        // WHEN + THEN
+        assertThrows(
+                CollectionEntryNotFoundException.class,
+                () -> collectionService.deleteFavorite("unknown-id")
+        );
+
+        verify(pokemonRepository, never()).deleteById(anyString());
+        verifyNoInteractions(pokemonService);
+    }
 }
