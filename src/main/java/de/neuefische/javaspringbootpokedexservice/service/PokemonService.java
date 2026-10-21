@@ -1,6 +1,8 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import java.util.List;
+import java.util.Random;
+
 import de.neuefische.javaspringbootpokedexservice.dto.PokemonApiDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -57,5 +59,12 @@ public class PokemonService {
                 pokemonApiDTO.weight(),
                 types
         );
+    }
+
+    public Pokemon getRandomPokemon() {
+        Random random = new Random();
+        int pokemonId = random.nextInt(151) + 1;
+
+        return getPokemonByName(String.valueOf(pokemonId));
     }
 }
