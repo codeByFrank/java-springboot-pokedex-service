@@ -1,5 +1,8 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonSummaryDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonTypeResponseDTO;
+import de.neuefische.javaspringbootpokedexservice.exception.PokemonTypeNotFoundException;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import java.util.List;
 import java.util.Random;
@@ -101,5 +104,31 @@ public class PokemonService {
                 tallerPokemon,
                 heightDifference
         );
+    }
+
+    public List<PokemonSummaryDTO> getPokemonByType(String type) {
+        PokemonTypeResponseDTO response;
+
+        try {
+            response = restClient.get()
+                    .uri("/type/{type}", type)
+                    .retrieve()
+                    .body(PokemonTypeResponseDTO.class);
+        } catch (HttpClientErrorException.NotFound exception) {
+            throw new PokemonTypeNotFoundException(
+                    "Pokemon type '" + type + "' not found"
+            );
+        }
+
+        if (response == null) {
+            throw new IllegalStateException(
+                    "Pokemon API returned an empty response"
+            );
+        }
+
+        return response.pokemon()
+                .stream()
+                .map(entry -> entry.pokemon())
+                .toList();
     }
 }

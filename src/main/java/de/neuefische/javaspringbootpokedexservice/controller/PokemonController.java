@@ -1,12 +1,15 @@
 package de.neuefische.javaspringbootpokedexservice.controller;
 
 import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonSummaryDTO;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.service.PokemonService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pokemon")
@@ -34,5 +37,12 @@ public class PokemonController {
             @PathVariable String pokemon2
     ) {
         return pokemonService.comparePokemon(pokemon1, pokemon2);
+    }
+
+    @GetMapping("/type/{type}")
+    public List<PokemonSummaryDTO> getPokemonByType(
+            @PathVariable String type
+    ) {
+        return pokemonService.getPokemonByType(type);
     }
 }

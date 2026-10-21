@@ -1,5 +1,7 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonSummaryDTO;
+import de.neuefische.javaspringbootpokedexservice.exception.PokemonTypeNotFoundException;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -237,5 +239,81 @@ class PokemonServiceTest {
         assertEquals(expected, actual);
         verify(service).getPokemonByName("first");
         verify(service).getPokemonByName("second");
+    }
+
+    @Test
+    void getPokemonByType_shouldReturnSimplifiedPokemonList() {
+        // GIVEN
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server =
+                MockRestServiceServer.bindTo(builder).build();
+
+        PokemonService service = new PokemonService(builder);
+
+        String responseBody = """
+            {
+              "pokemon": [
+                {
+                  "pokemon": {
+                    "name": "charmander",
+                    "url": "https://pokeapi.co/api/v2/pokemon/4/"
+                  }
+                },
+                {
+                  "pokemon": {
+                    "name": "charmeleon",
+                    "url": "https://pokeapi.co/api/v2/pokemon/5/"
+                  }
+                }
+              ]
+            }
+            """;
+
+        server.expect(requestTo(
+                        "https://pokeapi.co/api/v2/type/fire"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(
+                        responseBody, MediaType.APPLICATION_JSON));
+
+        List<PokemonSummaryDTO> expected = List.of(
+                new PokemonSummaryDTO(
+                        "charmander",
+                        "https://pokeapi.co/api/v2/pokemon/4/"
+                ),
+                new PokemonSummaryDTO(
+                        "charmeleon",
+                        "https://pokeapi.co/api/v2/pokemon/5/"
+                )
+        );
+
+        // WHEN
+        List<PokemonSummaryDTO> actual = service.getPokemonByType("fire");
+
+        // THEN
+        assertEquals(expected, actual);
+        server.verify();
+    }
+
+    @Test
+    void getPokemonByType_shouldThrowException_whenTypeDoesNotExist() {
+        // GIVEN
+        RestClient.Builder builder = RestClient.builder();
+        MockRestServiceServer server =
+                MockRestServiceServer.bindTo(builder).build();
+
+        PokemonService service = new PokemonService(builder);
+
+        server.expect(requestTo(
+                        "https://pokeapi.co/api/v2/type/unknown-type"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withResourceNotFound());
+
+        // WHEN + THEN
+        assertThrows(
+                PokemonTypeNotFoundException.class,
+                () -> service.getPokemonByType("unknown-type")
+        );
+
+        server.verify();
     }
 }
