@@ -10,7 +10,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import de.neuefische.javaspringbootpokedexservice.exception.GlobalExceptionHandler;
 import java.util.List;
+import de.neuefische.javaspringbootpokedexservice.dto.UpdateFavoriteDTO;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -255,5 +257,115 @@ class CollectionControllerTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
         verify(service).deleteFavorite("unknown-id");
+    }
+
+    @Test
+    void updateFavorite_shouldReturnUpdatedFavorite() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        UpdateFavoriteDTO updateDTO =
+                new UpdateFavoriteDTO("Arena-Champion");
+
+        Pokemon updated = new Pokemon(
+                "favorite-1",
+                "25",
+                "Arena-Champion",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        when(service.updateFavorite("favorite-1", updateDTO))
+                .thenReturn(updated);
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .build();
+
+        String requestBody = """
+            {
+              "nickname": "Arena-Champion"
+            }
+            """;
+
+        // WHEN + THEN
+        mockMvc.perform(put("/api/collection/favorite-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("favorite-1"))
+                .andExpect(jsonPath("$.nickname").value("Arena-Champion"))
+                .andExpect(jsonPath("$.pokemonName").value("pikachu"));
+
+        verify(service).updateFavorite("favorite-1", updateDTO);
+    }
+
+    @Test
+    void updateFavorite_shouldReturn400_whenNicknameIsTooShort() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        String requestBody = """
+            {
+              "nickname": "A"
+            }
+            """;
+
+        // WHEN + THEN
+        mockMvc.perform(put("/api/collection/favorite-1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(
+                        "Nickname must contain at least 2 characters"
+                ))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void updateFavorite_shouldReturn404_whenIdDoesNotExist() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        UpdateFavoriteDTO updateDTO =
+                new UpdateFavoriteDTO("Arena-Champion");
+
+        when(service.updateFavorite("unknown-id", updateDTO))
+                .thenThrow(new CollectionEntryNotFoundException(
+                        "Favorite with id 'unknown-id' not found"
+                ));
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        String requestBody = """
+            {
+              "nickname": "Arena-Champion"
+            }
+            """;
+
+        // WHEN + THEN
+        mockMvc.perform(put("/api/collection/unknown-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(
+                        "Favorite with id 'unknown-id' not found"
+                ))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        verify(service).updateFavorite("unknown-id", updateDTO);
     }
 }
