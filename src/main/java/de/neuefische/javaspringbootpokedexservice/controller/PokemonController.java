@@ -1,5 +1,6 @@
 package de.neuefische.javaspringbootpokedexservice.controller;
 
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.service.PokemonService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,5 +26,13 @@ public class PokemonController {
     @GetMapping("/random")
     public Pokemon getRandomPokemon() {
         return pokemonService.getRandomPokemon();
+    }
+
+    @GetMapping("/compare/{pokemon1}/{pokemon2}")
+    public PokemonComparisonDTO comparePokemon(
+            @PathVariable String pokemon1,
+            @PathVariable String pokemon2
+    ) {
+        return pokemonService.comparePokemon(pokemon1, pokemon2);
     }
 }

@@ -1,5 +1,6 @@
 package de.neuefische.javaspringbootpokedexservice.controller;
 
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
 import de.neuefische.javaspringbootpokedexservice.exception.GlobalExceptionHandler;
 import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
@@ -74,5 +75,35 @@ class PokemonControllerTest {
                 .andExpect(jsonPath("$.types[1]").value("poison"));
 
         verify(service).getRandomPokemon();
+    }
+
+    @Test
+    void comparePokemon_shouldReturnComparison() throws Exception {
+        // GIVEN
+        PokemonService service = mock(PokemonService.class);
+
+        PokemonComparisonDTO comparison = new PokemonComparisonDTO(
+                "charizard",
+                845,
+                "charizard",
+                13
+        );
+
+        when(service.comparePokemon("pikachu", "charizard"))
+                .thenReturn(comparison);
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new PokemonController(service))
+                .build();
+
+        // WHEN + THEN
+        mockMvc.perform(get("/api/pokemon/compare/pikachu/charizard"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.heavierPokemon").value("charizard"))
+                .andExpect(jsonPath("$.weightDifference").value(845))
+                .andExpect(jsonPath("$.tallerPokemon").value("charizard"))
+                .andExpect(jsonPath("$.heightDifference").value(13));
+
+        verify(service).comparePokemon("pikachu", "charizard");
     }
 }
