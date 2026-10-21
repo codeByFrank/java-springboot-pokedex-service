@@ -30,4 +30,9 @@ public class CollectionController {
     public List<Pokemon> getAllFavorites() {
         return collectionService.getAllFavorites();
     }
+
+    @GetMapping("/{id}")
+    public Pokemon getFavoriteById(@PathVariable String id) {
+        return collectionService.getFavoriteById(id);
+    }
 }

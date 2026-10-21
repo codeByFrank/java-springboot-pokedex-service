@@ -1,12 +1,14 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 
 import de.neuefische.javaspringbootpokedexservice.dto.FavoriteDTO;
+import de.neuefische.javaspringbootpokedexservice.exception.CollectionEntryNotFoundException;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.repository.PokemonRepository;
 import org.junit.jupiter.api.Test;
 import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -119,6 +121,60 @@ class CollectionServiceTest {
 
         assertEquals(expected, actual);
         verify(pokemonRepository).findAll();
+        verifyNoInteractions(pokemonService);
+    }
+
+    @Test
+    void getFavoriteById_shouldReturnFavorite_whenIdExists() {
+
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        Pokemon favorite = new Pokemon(
+                "favorite-1",
+                "25",
+                "Mein Starter",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        when(pokemonRepository.findById("favorite-1"))
+                .thenReturn(Optional.of(favorite));
+
+
+        Pokemon actual = collectionService.getFavoriteById("favorite-1");
+
+
+        assertEquals(favorite, actual);
+        verify(pokemonRepository).findById("favorite-1");
+        verifyNoInteractions(pokemonService);
+    }
+
+    @Test
+    void getFavoriteById_shouldThrowException_whenIdDoesNotExist() {
+       
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        when(pokemonRepository.findById("unknown-id"))
+                .thenReturn(Optional.empty());
+
+
+        assertThrows(
+                CollectionEntryNotFoundException.class,
+                () -> collectionService.getFavoriteById("unknown-id")
+        );
+
+        verify(pokemonRepository).findById("unknown-id");
         verifyNoInteractions(pokemonService);
     }
 }

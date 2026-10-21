@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import de.neuefische.javaspringbootpokedexservice.exception.CollectionEntryNotFoundException;
 
 @Service
 public class CollectionService {
@@ -43,5 +44,12 @@ public class CollectionService {
 
     public List<Pokemon> getAllFavorites() {
         return pokemonRepository.findAll();
+    }
+
+    public Pokemon getFavoriteById(String id) {
+        return pokemonRepository.findById(id)
+                .orElseThrow(() -> new CollectionEntryNotFoundException(
+                        "Favorite with id '" + id + "' not found"
+                ));
     }
 }
