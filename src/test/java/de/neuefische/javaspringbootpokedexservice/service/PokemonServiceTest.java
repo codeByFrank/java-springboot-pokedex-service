@@ -14,7 +14,11 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import de.neuefische.javaspringbootpokedexservice.exception.PokemonNotFoundException;
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound;
 
 class PokemonServiceTest {
@@ -148,5 +152,90 @@ class PokemonServiceTest {
         // THEN
         assertEquals("gastly", actual.pokemonName());
         server.verify();
+    }
+
+    @Test
+    void comparePokemon_shouldCompareWeightAndHeight() {
+        // GIVEN
+        PokemonService service =
+                spy(new PokemonService(RestClient.builder()));
+
+        Pokemon firstPokemon = new Pokemon(
+                null,
+                "1",
+                null,
+                "first",
+                "https://example.com/first.png",
+                20,
+                100,
+                List.of("grass")
+        );
+
+        Pokemon secondPokemon = new Pokemon(
+                null,
+                "2",
+                null,
+                "second",
+                "https://example.com/second.png",
+                10,
+                300,
+                List.of("fire")
+        );
+
+        doReturn(firstPokemon)
+                .when(service).getPokemonByName("first");
+
+        doReturn(secondPokemon)
+                .when(service).getPokemonByName("second");
+
+        PokemonComparisonDTO expected = new PokemonComparisonDTO(
+                "second",
+                200,
+                "first",
+                10
+        );
+
+        // WHEN
+        PokemonComparisonDTO actual =
+                service.comparePokemon("first", "second");
+
+        // THEN
+        assertEquals(expected, actual);
+        verify(service).getPokemonByName("first");
+        verify(service).getPokemonByName("second");
+    }
+
+    @Test
+    void comparePokemon_shouldReturnZeroDifferences_whenValuesAreEqual() {
+        // GIVEN
+        PokemonService service =
+                spy(new PokemonService(RestClient.builder()));
+
+        Pokemon first = new Pokemon(
+                null, "1", null, "first",
+                "https://example.com/first.png",
+                10, 100, List.of("grass")
+        );
+
+        Pokemon second = new Pokemon(
+                null, "2", null, "second",
+                "https://example.com/second.png",
+                10, 100, List.of("fire")
+        );
+
+        doReturn(first).when(service).getPokemonByName("first");
+        doReturn(second).when(service).getPokemonByName("second");
+
+        PokemonComparisonDTO expected =
+                new PokemonComparisonDTO(null, 0, null, 0);
+
+        // WHEN
+        PokemonComparisonDTO actual =
+                service.comparePokemon("first", "second");
+
+        // THEN
+        assertEquals(expected, actual);
+        verify(service).getPokemonByName("first");
+        verify(service).getPokemonByName("second");
     }
 }

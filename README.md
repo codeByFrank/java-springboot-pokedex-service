@@ -90,6 +90,7 @@ API-Antworten. Die Controller-Tests verwenden MockMvc.
 | GET | `/api/collection` | Alle Favoriten abrufen | 200 |
 | GET | `/api/collection/{id}` | Einzelnen Favoriten abrufen | 200 |
 | GET | `/api/pokemon/random` | Zufälliges Pokémon aus den ersten 151 abrufen | 200 |
+| GET | `/api/pokemon/compare/{pokemon1}/{pokemon2}` | Zwei Pokémon vergleichen | 200 |
 | PUT | `/api/collection/{id}` | Nickname ändern | 200 |
 | DELETE | `/api/collection/{id}` | Favoriten löschen | 204 |
 
@@ -169,6 +170,12 @@ Beispiel:
 - Favoriten durchsuchen: Suche nach Teilen des Pokémon-Namens
   oder Nicknames, unabhängig von Groß- und Kleinschreibung.
   Endpoint: `GET /api/collection/search?name=pika`
+
+- Pokémon vergleichen: `GET /api/pokemon/compare/{pokemon1}/{pokemon2}`
+  vergleicht Größe und Gewicht zweier Pokémon.
+  Gewichtsunterschiede werden in Hektogramm, Größenunterschiede
+  in Dezimetern angegeben. Bei Gleichstand ist der jeweilige
+  Name `null` und die Differenz `0`.
 
 ## Datenquelle
 

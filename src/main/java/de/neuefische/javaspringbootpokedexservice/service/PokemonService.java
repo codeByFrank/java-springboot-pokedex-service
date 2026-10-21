@@ -1,4 +1,5 @@
 package de.neuefische.javaspringbootpokedexservice.service;
+import de.neuefische.javaspringbootpokedexservice.dto.PokemonComparisonDTO;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import java.util.List;
 import java.util.Random;
@@ -66,5 +67,39 @@ public class PokemonService {
         int pokemonId = random.nextInt(151) + 1;
 
         return getPokemonByName(String.valueOf(pokemonId));
+    }
+
+    public PokemonComparisonDTO comparePokemon(
+            String firstName,
+            String secondName
+    ) {
+        Pokemon first = getPokemonByName(firstName);
+        Pokemon second = getPokemonByName(secondName);
+
+        String heavierPokemon = null;
+
+        if (first.weight() > second.weight()) {
+            heavierPokemon = first.pokemonName();
+        } else if (second.weight() > first.weight()) {
+            heavierPokemon = second.pokemonName();
+        }
+
+        String tallerPokemon = null;
+
+        if (first.height() > second.height()) {
+            tallerPokemon = first.pokemonName();
+        } else if (second.height() > first.height()) {
+            tallerPokemon = second.pokemonName();
+        }
+
+        int weightDifference = Math.abs(first.weight() - second.weight());
+        int heightDifference = Math.abs(first.height() - second.height());
+
+        return new PokemonComparisonDTO(
+                heavierPokemon,
+                weightDifference,
+                tallerPokemon,
+                heightDifference
+        );
     }
 }
