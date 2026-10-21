@@ -1,6 +1,7 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 
 import de.neuefische.javaspringbootpokedexservice.dto.FavoriteDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.UpdateFavoriteDTO;
 import de.neuefische.javaspringbootpokedexservice.exception.CollectionEntryNotFoundException;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.repository.PokemonRepository;
@@ -218,6 +219,82 @@ class CollectionServiceTest {
         );
 
         verify(pokemonRepository, never()).deleteById(anyString());
+        verifyNoInteractions(pokemonService);
+    }
+
+    @Test
+    void updateFavorite_shouldChangeOnlyNickname_whenIdExists() {
+        // GIVEN
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        Pokemon original = new Pokemon(
+                "favorite-1",
+                "25",
+                "Mein Starter",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        UpdateFavoriteDTO updateDTO =
+                new UpdateFavoriteDTO("Arena-Champion");
+
+        Pokemon expected = new Pokemon(
+                "favorite-1",
+                "25",
+                "Arena-Champion",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        when(pokemonRepository.findById("favorite-1"))
+                .thenReturn(Optional.of(original));
+
+        when(pokemonRepository.save(expected))
+                .thenReturn(expected);
+
+        // WHEN
+        Pokemon actual = collectionService.updateFavorite(
+                "favorite-1", updateDTO
+        );
+
+        // THEN
+        assertEquals(expected, actual);
+        verify(pokemonRepository).save(expected);
+        verifyNoInteractions(pokemonService);
+    }
+
+    @Test
+    void updateFavorite_shouldThrowException_whenIdDoesNotExist() {
+        // GIVEN
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        UpdateFavoriteDTO updateDTO =
+                new UpdateFavoriteDTO("Arena-Champion");
+
+        when(pokemonRepository.findById("unknown-id"))
+                .thenReturn(Optional.empty());
+
+        // WHEN + THEN
+        assertThrows(
+                CollectionEntryNotFoundException.class,
+                () -> collectionService.updateFavorite("unknown-id", updateDTO)
+        );
+
+        verify(pokemonRepository, never()).save(any(Pokemon.class));
         verifyNoInteractions(pokemonService);
     }
 }

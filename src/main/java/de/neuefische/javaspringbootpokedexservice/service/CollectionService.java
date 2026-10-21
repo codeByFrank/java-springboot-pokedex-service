@@ -1,6 +1,7 @@
 package de.neuefische.javaspringbootpokedexservice.service;
 
 import de.neuefische.javaspringbootpokedexservice.dto.FavoriteDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.UpdateFavoriteDTO;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.repository.PokemonRepository;
 import org.springframework.stereotype.Service;
@@ -61,5 +62,22 @@ public class CollectionService {
         }
 
         pokemonRepository.deleteById(id);
+    }
+
+    public Pokemon updateFavorite(String id, UpdateFavoriteDTO updateDTO) {
+        Pokemon existing = getFavoriteById(id);
+
+        Pokemon updated = new Pokemon(
+                existing.id(),
+                existing.pokemonId(),
+                updateDTO.nickname(),
+                existing.pokemonName(),
+                existing.pictureUrl(),
+                existing.height(),
+                existing.weight(),
+                existing.types()
+        );
+
+        return pokemonRepository.save(updated);
     }
 }

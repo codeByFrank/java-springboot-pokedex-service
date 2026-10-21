@@ -1,6 +1,7 @@
 package de.neuefische.javaspringbootpokedexservice.controller;
 
 import de.neuefische.javaspringbootpokedexservice.dto.FavoriteDTO;
+import de.neuefische.javaspringbootpokedexservice.dto.UpdateFavoriteDTO;
 import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.service.CollectionService;
 import org.springframework.http.HttpStatus;
@@ -40,5 +41,13 @@ public class CollectionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFavorite(@PathVariable String id) {
         collectionService.deleteFavorite(id);
+    }
+
+    @PutMapping("/{id}")
+    public Pokemon updateFavorite(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateFavoriteDTO updateDTO
+    ) {
+        return collectionService.updateFavorite(id, updateDTO);
     }
 }
