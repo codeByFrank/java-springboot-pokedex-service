@@ -5,7 +5,9 @@ import de.neuefische.javaspringbootpokedexservice.model.Pokemon;
 import de.neuefische.javaspringbootpokedexservice.repository.PokemonRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import de.neuefische.javaspringbootpokedexservice.exception.CollectionEntryNotFoundException;
 
 @Service
 public class CollectionService {
@@ -38,5 +40,26 @@ public class CollectionService {
         );
 
         return pokemonRepository.save(favorite);
+    }
+
+    public List<Pokemon> getAllFavorites() {
+        return pokemonRepository.findAll();
+    }
+
+    public Pokemon getFavoriteById(String id) {
+        return pokemonRepository.findById(id)
+                .orElseThrow(() -> new CollectionEntryNotFoundException(
+                        "Favorite with id '" + id + "' not found"
+                ));
+    }
+
+    public void deleteFavorite(String id) {
+        if (!pokemonRepository.existsById(id)) {
+            throw new CollectionEntryNotFoundException(
+                    "Favorite with id '" + id + "' not found"
+            );
+        }
+
+        pokemonRepository.deleteById(id);
     }
 }

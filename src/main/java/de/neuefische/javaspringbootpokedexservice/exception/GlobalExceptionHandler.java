@@ -35,4 +35,15 @@ public class GlobalExceptionHandler {
 
         return new ErrorMessage(message, Instant.now());
     }
+
+    @ExceptionHandler(CollectionEntryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handleCollectionEntryNotFound(
+            CollectionEntryNotFoundException exception
+    ) {
+        return new ErrorMessage(
+                exception.getMessage(),
+                Instant.now()
+        );
+    }
 }
