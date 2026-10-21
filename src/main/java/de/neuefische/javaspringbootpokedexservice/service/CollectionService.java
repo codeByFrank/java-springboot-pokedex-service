@@ -80,4 +80,11 @@ public class CollectionService {
 
         return pokemonRepository.save(updated);
     }
+
+    public List<Pokemon> searchFavorites(String name) {
+        return pokemonRepository
+                .findByPokemonNameContainingIgnoreCaseOrNicknameContainingIgnoreCase(
+                        name, name
+                );
+    }
 }

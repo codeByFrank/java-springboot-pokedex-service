@@ -50,4 +50,9 @@ public class CollectionController {
     ) {
         return collectionService.updateFavorite(id, updateDTO);
     }
+
+    @GetMapping("/search")
+    public List<Pokemon> searchFavorites(@RequestParam String name) {
+        return collectionService.searchFavorites(name);
+    }
 }
