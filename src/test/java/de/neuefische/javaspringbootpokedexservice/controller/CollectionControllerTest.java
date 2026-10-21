@@ -368,4 +368,62 @@ class CollectionControllerTest {
 
         verify(service).updateFavorite("unknown-id", updateDTO);
     }
+
+    @Test
+    void searchFavorites_shouldReturnMatchingFavorites() throws Exception {
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        Pokemon favorite = new Pokemon(
+                "favorite-1",
+                "25",
+                "Arena-Champion",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        when(service.searchFavorites("pika"))
+                .thenReturn(List.of(favorite));
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .build();
+
+        // WHEN + THEN
+        mockMvc.perform(get("/api/collection/search")
+                        .param("name", "pika"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value("favorite-1"))
+                .andExpect(jsonPath("$[0].pokemonName").value("pikachu"))
+                .andExpect(jsonPath("$[0].nickname").value("Arena-Champion"));
+
+        verify(service).searchFavorites("pika");
+    }
+
+    @Test
+    void searchFavorites_shouldReturnEmptyList_whenNothingMatches()
+            throws Exception {
+
+        // GIVEN
+        CollectionService service = mock(CollectionService.class);
+
+        when(service.searchFavorites("xyz"))
+                .thenReturn(List.of());
+
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(new CollectionController(service))
+                .build();
+
+        // WHEN + THEN
+        mockMvc.perform(get("/api/collection/search")
+                        .param("name", "xyz"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+
+        verify(service).searchFavorites("xyz");
+    }
 }

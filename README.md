@@ -161,7 +161,9 @@ Beispiel:
 
 ## Bonusaufgaben
 
-Bisher wurden keine Bonusaufgaben umgesetzt.
+- Favoriten durchsuchen: Suche nach Teilen des Pokémon-Namens
+  oder Nicknames, unabhängig von Groß- und Kleinschreibung.
+  Endpoint: `GET /api/collection/search?name=pika`
 
 ## Datenquelle
 

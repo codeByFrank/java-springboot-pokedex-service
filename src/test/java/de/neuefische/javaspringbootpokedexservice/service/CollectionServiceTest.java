@@ -297,4 +297,46 @@ class CollectionServiceTest {
         verify(pokemonRepository, never()).save(any(Pokemon.class));
         verifyNoInteractions(pokemonService);
     }
+
+    @Test
+    void searchFavorites_shouldReturnMatchingFavorites() {
+        // GIVEN
+        PokemonService pokemonService = mock(PokemonService.class);
+        PokemonRepository pokemonRepository = mock(PokemonRepository.class);
+
+        CollectionService collectionService =
+                new CollectionService(pokemonService, pokemonRepository);
+
+        Pokemon favorite = new Pokemon(
+                "favorite-1",
+                "25",
+                "Mein Starter",
+                "pikachu",
+                "https://example.com/pikachu.png",
+                4,
+                60,
+                List.of("electric")
+        );
+
+        List<Pokemon> expected = List.of(favorite);
+
+        when(pokemonRepository
+                .findByPokemonNameContainingIgnoreCaseOrNicknameContainingIgnoreCase(
+                        "pika", "pika"
+                ))
+                .thenReturn(expected);
+
+        // WHEN
+        List<Pokemon> actual = collectionService.searchFavorites("pika");
+
+        // THEN
+        assertEquals(expected, actual);
+
+        verify(pokemonRepository)
+                .findByPokemonNameContainingIgnoreCaseOrNicknameContainingIgnoreCase(
+                        "pika", "pika"
+                );
+
+        verifyNoInteractions(pokemonService);
+    }
 }
