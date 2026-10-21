@@ -46,4 +46,15 @@ public class GlobalExceptionHandler {
                 Instant.now()
         );
     }
+
+    @ExceptionHandler(PokemonTypeNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage handlePokemonTypeNotFound(
+            PokemonTypeNotFoundException exception
+    ) {
+        return new ErrorMessage(
+                exception.getMessage(),
+                Instant.now()
+        );
+    }
 }
